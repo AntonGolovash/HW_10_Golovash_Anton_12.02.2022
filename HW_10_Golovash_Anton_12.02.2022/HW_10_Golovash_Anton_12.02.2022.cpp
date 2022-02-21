@@ -5,15 +5,31 @@
 
 using namespace std;
 
+size_t fileSize(const string path)
+{
+	ifstream file(path.c_str()); // файл
+	size_t s = 0; // счетчик символов
+
+	while (!file.eof()) // пока не достигнут конец файла
+	{
+		file.get();       // читать по одному символу
+		s++;              // и увеличивать счетчик
+	}
+
+	file.close(); // обязательно закрыть
+	s--; // убираем лишнюю итерацию
+	return s; // вернуть число символов/байтов
+};
+
 int main()
 {
 	//******************************************************
 
-	ofstream addString;
+	ofstream addString;// создаём объект класса ofstream для записи
 	ifstream getWord;
 	ifstream getString;
 
-	addString.open("LOG_HW_10.txt"); // создаём объект класса ofstream для записи и связываем его с файлом C++_HW_10.txt
+	addString.open("LOG_HW_10.txt");// cвязываем addString с файлом C++_HW_10.txt
 	
 	if (addString.is_open())
 	{
@@ -66,7 +82,7 @@ int main()
 
 	//******************************************************
 
-	addString.open("C++_HW_10.txt", ios::app);
+	addString.open("C++_HW_10.txt", addString.app);
 
 	if (addString.is_open())
 	{
@@ -76,7 +92,9 @@ int main()
 		addString << "Девятая строчка в файле\n"; // запись строки в файл
 	}
 
-	addString.close();
+	//******************************************************
+
+	cout << "Size of \"C++_HW_10.txt\" - " << fileSize("C++_HW_10.txt") << " bytes" << endl;
 
 	//******************************************************
 
