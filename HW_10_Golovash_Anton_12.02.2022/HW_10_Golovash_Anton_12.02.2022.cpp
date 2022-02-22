@@ -1,102 +1,135 @@
 ﻿#include <iostream>
 #include <fstream>
 #include <thread>
+#include <mutex>
 #include "Race.h"
-
+#include "FILE.h"
+#include "LOG.cpp"
 using namespace std;
 
-size_t fileSize(const string path)
+void writeToFile(int numberDegree, string path)
 {
-	ifstream file(path.c_str()); // файл
-	size_t s = 0; // счетчик символов
+	mutex wrightingMutex;
+	wrightingMutex.lock();
 
-	while (!file.eof()) // пока не достигнут конец файла
+	File::Clear(path);
+	string data{ "" };
+
+	for (size_t i = 2, number = 0; i < numberDegree; i *= 2, number++)
 	{
-		file.get();       // читать по одному символу
-		s++;              // и увеличивать счетчик
+		cout << path << endl;
+		this_thread::sleep_for(2000ms);
+		data = to_string(number) + "^2->" + to_string(i);
+		File::Append(data, path);
+		cout << "Wrote the data:\t" << data << endl;
 	}
 
-	file.close(); // обязательно закрыть
-	s--; // убираем лишнюю итерацию
-	return s; // вернуть число символов/байтов
+	Log::Append("Success", File::GetPath("log.txt"));
+	wrightingMutex.unlock();
+}
+
+size_t fileSize(const string path) // size of file 
+{
+	ifstream file(path.c_str());
+	size_t s = 0; // char counter
+
+	while (!file.eof()) // while not the end of file
+	{
+		file.get(); // reading by one char
+		s++; // increasing char counter
+	}
+
+	file.close(); // file closing
+	s--; // removing extra iteration
+	return s; // returning char counter
 };
 
 int main()
 {
 	//******************************************************
 
-	ofstream addString;// создаём объект класса ofstream для записи
-	ifstream getWord;
-	ifstream getString;
-
-	addString.open("LOG_HW_10.txt");// cвязываем addString с файлом C++_HW_10.txt
+	ofstream wrightString;// creating an object of class ofstream for WRIGHTING STRING
 	
-	if (addString.is_open())
+	ifstream readWord;// creating an object of class ifstream for READING WORD 
+	
+	ifstream readString;// creating an object of class ifstream for READING STRING
+
+	const char* fileNamePointer = "C++_HW_10.txt";// creating the file name pointer
+
+	//wrightString
 	{
-		addString << "Первая строчка в файле\n"; // запись строки в файл
-		addString << "Вторая строчка в файле\n"; // запись строки в файл
-		addString << "Третья строчка в файле\n"; // запись строки в файл
-		addString << "Четвёртая строчка в файле\n"; // запись строки в файл
-		addString << "Пятая строчка в файле\n"; // запись строки в файл
-	}
-	
-	addString.close(); // закрываем файл
+		wrightString.open(fileNamePointer);// linking addString with file C++_HW_10.txt
 
-	//******************************************************
-	
-	setlocale(LC_ALL, "rus");
-	char wordbuffer[50]; // буфер промежуточного хранения считываемого из файла текста
-	
-	getWord.open("LOG_HW_10.txt"); // открытие файла для чтения
-
-	if (getWord.is_open())
-	{
-		while (!getWord.eof())
+		if (wrightString.is_open())
 		{
-			getWord >> wordbuffer; // считывание слова из файла
-			cout << wordbuffer << endl; // печать считанного слова слово
+			wrightString << "Первая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Вторая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Третья строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Четвёртая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Пятая строчка в файле\n"; // wrighting the string in the file
 		}
+
+		wrightString.close(); // closing the file
 	}
-	
-	getWord.close(); // закрытие файла
-
-	//******************************************************
-
-	getString.open("LOG_HW_10.txt"); // открытие файла для чтения
-
-	if (getString.is_open())
+	//wrightString
+	// 
+	//readWord
 	{
-		while (!getString.eof())
-		{
-			getString.getline(wordbuffer, 50); // считывание строки из файла
-			cout << wordbuffer << endl; // печать считанной строки
-		}
-	}
-	getString.close(); // закрытие файла
+		setlocale(LC_ALL, "rus");
+		char wordbuffer[50]; // buffer for intermediate storage of text read from a file
 
-	//******************************************************
+		readWord.open(fileNamePointer); // opening file for reading
+
+		if (readWord.is_open())
+		{
+			while (!readWord.eof())
+			{
+				readWord >> wordbuffer; // reading a word from a file
+				cout << wordbuffer << endl; // output to the console of the read word
+			}
+		}
+
+		readWord.close(); // closing the file
+	}
+	//readWord
+	
+	//readString
+	{
+		readString.open(fileNamePointer); // opening file for reading
+
+		if (readString.is_open())
+		{
+			while (!readString.eof())
+			{
+				readString.getline(wordbuffer, 50); // reading a string from a file
+				cout << wordbuffer << endl; // output to the console of the read string
+			}
+		}
+		readString.close(); // closing the file
+	}
+	//readString
 
 	int threadLimit = thread::hardware_concurrency();
 	cout << "Limit of threads - " << threadLimit << endl;
 	cout << "(Main) ID - " << this_thread::get_id() << endl;
 
-	//******************************************************
-
-	addString.open("C++_HW_10.txt", addString.app);
-
-	if (addString.is_open())
+	//wrightStringAppend
 	{
-		addString << "Шестая строчка в файле\n"; // запись строки в файл
-		addString << "Седьмая строчка в файле\n"; // запись строки в файл
-		addString << "Восьмая строчка в файле\n"; // запись строки в файл
-		addString << "Девятая строчка в файле\n"; // запись строки в файл
-	}
+		wrightString.open(fileNamePointer, wrightString.app);
 
-	//******************************************************
+		if (wrightString.is_open())
+		{
+			wrightString << "Шестая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Седьмая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Восьмая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Девятая строчка в файле\n"; // wrighting the string in the file
+		}
+	}
+	//wrightStringAppend
 
 	cout << "Size of \"C++_HW_10.txt\" - " << fileSize("C++_HW_10.txt") << " bytes" << endl;
 
-	//******************************************************
+	//*******************
 
 	//Race race;
 	//thread WrightThread;
@@ -108,6 +141,20 @@ int main()
 	//ReadThread.join();
 	//ActionThread.join();
 	//RunThread.join();
+
+	//*******************
+
+	cout << "Thread count:\t" << thread::hardware_concurrency() << endl;
+	//cout << File::GetPath("degree2048.txt") << endl;
+	thread thread_1(writeToFile, 2048, File::GetPath("degree2048.txt"));
+	thread thread_2(writeToFile, 1024, File::GetPath("degree1024.txt"));
+	thread thread_3(writeToFile, 4096, File::GetPath("degree4096.txt"));
+
+	thread_1.join();
+	thread_2.join();
+	thread_3.join();
+
+	//*******************
 
 	system("pause");
 	return 0;
