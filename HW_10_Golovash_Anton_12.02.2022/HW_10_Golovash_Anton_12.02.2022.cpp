@@ -30,7 +30,7 @@ size_t fileSize(const string path)
 		wrightingMutex.lock();
 
 		ofstream wrightString;
-		wrightString.open(fileNamePointer);
+		wrightString.open(fileNamePointer, wrightString.app);
 
 		if (wrightString.is_open())
 		{
