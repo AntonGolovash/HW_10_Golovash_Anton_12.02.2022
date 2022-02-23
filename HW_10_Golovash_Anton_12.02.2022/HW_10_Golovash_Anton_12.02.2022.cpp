@@ -2,160 +2,93 @@
 #include <fstream>
 #include <thread>
 #include <mutex>
-#include "Race.h"
-#include "FILE.h"
-#include "LOG.cpp"
 using namespace std;
 
-void writeToFile(int numberDegree, string path)
-{
-	mutex wrightingMutex;
-	wrightingMutex.lock();
-
-	File::Clear(path);
-	string data{ "" };
-
-	for (size_t i = 2, number = 0; i < numberDegree; i *= 2, number++)
-	{
-		cout << path << endl;
-		this_thread::sleep_for(2000ms);
-		data = to_string(number) + "^2->" + to_string(i);
-		File::Append(data, path);
-		cout << "Wrote the data:\t" << data << endl;
-	}
-
-	Log::Append("Success", File::GetPath("log.txt"));
-	wrightingMutex.unlock();
-}
-
-size_t fileSize(const string path) // size of file 
+size_t fileSize(const string path)
 {
 	ifstream file(path.c_str());
-	size_t s = 0; // char counter
+	size_t s = 0;
 
-	while (!file.eof()) // while not the end of file
+	while (!file.eof())
 	{
-		file.get(); // reading by one char
-		s++; // increasing char counter
+		file.get();
+		s++;
 	}
 
-	file.close(); // file closing
-	s--; // removing extra iteration
-	return s; // returning char counter
+	file.close();
+	s--;
+	return s;
 };
 
-int main()
-{
-	//******************************************************
+	int lineNumber = 1;
 
-	ofstream wrightString;// creating an object of class ofstream for WRIGHTING STRING
-	
-	ifstream readWord;// creating an object of class ifstream for READING WORD 
-	
-	ifstream readString;// creating an object of class ifstream for READING STRING
-
-	const char* fileNamePointer = "C++_HW_10.txt";// creating the file name pointer
-
-	//wrightString
+	void wrightToFile(const char* fileNamePointer)
 	{
-		wrightString.open(fileNamePointer);// linking addString with file C++_HW_10.txt
+		setlocale(LC_ALL, "ru");
+
+		mutex wrightingMutex;
+		wrightingMutex.lock();
+
+		ofstream wrightString;
+		wrightString.open(fileNamePointer);
 
 		if (wrightString.is_open())
 		{
-			wrightString << "Первая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Вторая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Третья строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Четвёртая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Пятая строчка в файле\n"; // wrighting the string in the file
+			wrightString << "Строка " << lineNumber << " в файле \"C++_HW_10.txt\"\n";
+
+			cout << "(wrightToFile) ID - " << this_thread::get_id() << "\t";
+			cout << "В файл записана строка номер - " << lineNumber << "\n";
+
+			lineNumber++;
+
+			this_thread::sleep_for(200ms);
 		}
+		wrightString.close();
+		wrightingMutex.unlock();
+	};
 
-		wrightString.close(); // closing the file
-	}
-	//wrightString
-	// 
-	//readWord
+	void readFromFile(const char* fileNamePointer)
 	{
-		setlocale(LC_ALL, "rus");
-		char wordbuffer[50]; // buffer for intermediate storage of text read from a file
+		setlocale(LC_ALL, "ru");
 
-		readWord.open(fileNamePointer); // opening file for reading
+		mutex readingMutex;
+		readingMutex.lock();
 
-		if (readWord.is_open())
-		{
-			while (!readWord.eof())
-			{
-				readWord >> wordbuffer; // reading a word from a file
-				cout << wordbuffer << endl; // output to the console of the read word
-			}
-		}
-
-		readWord.close(); // closing the file
-	}
-	//readWord
-	
-	//readString
-	{
-		readString.open(fileNamePointer); // opening file for reading
+		ifstream readString;
+		readString.open(fileNamePointer);
 
 		if (readString.is_open())
 		{
+			char* temporaryString = new char[256];
+			temporaryString[255] = 0;
+
 			while (!readString.eof())
 			{
-				readString.getline(wordbuffer, 50); // reading a string from a file
-				cout << wordbuffer << endl; // output to the console of the read string
+				readString.getline(temporaryString, 50, '\n');
+
+				std::cout << "(readFromFile) ID - " << this_thread::get_id() << "\t";
+				std::cout << temporaryString << endl;
+
+				this_thread::sleep_for(100ms);
 			}
+			readString.close();
 		}
-		readString.close(); // closing the file
-	}
-	//readString
+		readingMutex.unlock();
+	};
 
-	int threadLimit = thread::hardware_concurrency();
-	cout << "Limit of threads - " << threadLimit << endl;
-	cout << "(Main) ID - " << this_thread::get_id() << endl;
+int main()
+{
+	const char* fileNamePointer = "C++_HW_10.txt";
 
-	//wrightStringAppend
+	for (size_t i = 0; i < 10; i++)
 	{
-		wrightString.open(fileNamePointer, wrightString.app);
-
-		if (wrightString.is_open())
-		{
-			wrightString << "Шестая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Седьмая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Восьмая строчка в файле\n"; // wrighting the string in the file
-			wrightString << "Девятая строчка в файле\n"; // wrighting the string in the file
-		}
+		thread thread_1(wrightToFile, fileNamePointer);
+		this_thread::sleep_for(10ms);
+		thread thread_2(readFromFile, fileNamePointer);
+		thread_1.join();
+		thread_2.join();
 	}
-	//wrightStringAppend
-
-	cout << "Size of \"C++_HW_10.txt\" - " << fileSize("C++_HW_10.txt") << " bytes" << endl;
-
-	//*******************
-
-	//Race race;
-	//thread WrightThread;
-	//thread ReadThread;
-	//thread ActionThread;
-	//thread RunThread;
-
-	//WrightThread.join();
-	//ReadThread.join();
-	//ActionThread.join();
-	//RunThread.join();
-
-	//*******************
-
-	cout << "Thread count:\t" << thread::hardware_concurrency() << endl;
-	//cout << File::GetPath("degree2048.txt") << endl;
-	thread thread_1(writeToFile, 2048, File::GetPath("degree2048.txt"));
-	thread thread_2(writeToFile, 1024, File::GetPath("degree1024.txt"));
-	thread thread_3(writeToFile, 4096, File::GetPath("degree4096.txt"));
-
-	thread_1.join();
-	thread_2.join();
-	thread_3.join();
-
-	//*******************
 
 	system("pause");
 	return 0;
-}
+};

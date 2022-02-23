@@ -139,15 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FILE.cpp" />
     <ClCompile Include="HW_10_Golovash_Anton_12.02.2022.cpp" />
-    <ClCompile Include="LOG.cpp" />
-    <ClCompile Include="Race.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="FILE.h" />
-    <ClInclude Include="LOG.h" />
-    <ClInclude Include="Race.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

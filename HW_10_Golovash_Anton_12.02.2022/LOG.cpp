@@ -2,7 +2,6 @@
 #include<time.h>// <ctime>
 #include"FILE.h"
 #include <sstream>
-
 using namespace std;
 
 class Log
