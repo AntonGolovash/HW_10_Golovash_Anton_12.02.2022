@@ -82,11 +82,18 @@ int main()
 
 	for (size_t i = 0; i < 10; i++)
 	{
-		thread thread_1(wrightToFile, fileNamePointer);
-		this_thread::sleep_for(10ms);
-		thread thread_2(readFromFile, fileNamePointer);
-		thread_1.join();
-		thread_2.join();
+
+		while (true)
+		{
+			thread thread_1(wrightToFile, fileNamePointer);
+			thread_1.join();
+
+			this_thread::sleep_for(10ms);
+
+			thread thread_2(readFromFile, fileNamePointer);
+			thread_2.join();
+		}
+
 	}
 
 	system("pause");
