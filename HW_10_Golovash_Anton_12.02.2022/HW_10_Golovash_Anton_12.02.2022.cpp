@@ -20,61 +20,61 @@ size_t fileSize(const string path)
 	return s;
 };
 
-	int lineNumber = 1;
+int lineNumber = 1;
 
-	void wrightToFile(const char* fileNamePointer)
+void wrightToFile(const char* fileNamePointer)
+{
+	setlocale(LC_ALL, "ru");
+
+	mutex wrightingMutex;
+	wrightingMutex.lock();
+
+	ofstream wrightString;
+	wrightString.open(fileNamePointer, wrightString.app);
+
+	if (wrightString.is_open())
 	{
-		setlocale(LC_ALL, "ru");
+		wrightString << "Строка " << lineNumber << " в файле \"C++_HW_10.txt\"\n";
 
-		mutex wrightingMutex;
-		wrightingMutex.lock();
+		cout << "(wrightToFile) ID - " << this_thread::get_id() << "\t";
+		cout << "В файл записана строка номер - " << lineNumber << "\n";
 
-		ofstream wrightString;
-		wrightString.open(fileNamePointer, wrightString.app);
+		lineNumber++;
 
-		if (wrightString.is_open())
-		{
-			wrightString << "Строка " << lineNumber << " в файле \"C++_HW_10.txt\"\n";
+		this_thread::sleep_for(200ms);
+	}
+	wrightString.close();
+	wrightingMutex.unlock();
+};
 
-			cout << "(wrightToFile) ID - " << this_thread::get_id() << "\t";
-			cout << "В файл записана строка номер - " << lineNumber << "\n";
+void readFromFile(const char* fileNamePointer)
+{
+	setlocale(LC_ALL, "ru");
 
-			lineNumber++;
+	mutex readingMutex;
+	readingMutex.lock();
 
-			this_thread::sleep_for(200ms);
-		}
-		wrightString.close();
-		wrightingMutex.unlock();
-	};
+	ifstream readString;
+	readString.open(fileNamePointer);
 
-	void readFromFile(const char* fileNamePointer)
+	if (readString.is_open())
 	{
-		setlocale(LC_ALL, "ru");
+		char* temporaryString = new char[256];
+		temporaryString[255] = 0;
 
-		mutex readingMutex;
-		readingMutex.lock();
-
-		ifstream readString;
-		readString.open(fileNamePointer);
-
-		if (readString.is_open())
+		while (!readString.eof())
 		{
-			char* temporaryString = new char[256];
-			temporaryString[255] = 0;
+			readString.getline(temporaryString, 50, '\n');
 
-			while (!readString.eof())
-			{
-				readString.getline(temporaryString, 50, '\n');
+			std::cout << "(readFromFile) ID - " << this_thread::get_id() << "\t";
+			std::cout << temporaryString << endl;
 
-				std::cout << "(readFromFile) ID - " << this_thread::get_id() << "\t";
-				std::cout << temporaryString << endl;
-
-				this_thread::sleep_for(100ms);
-			}
-			readString.close();
+			this_thread::sleep_for(100ms);
 		}
-		readingMutex.unlock();
-	};
+		readString.close();
+	}
+	readingMutex.unlock();
+};
 
 int main()
 {
@@ -82,7 +82,6 @@ int main()
 
 	for (size_t i = 0; i < 10; i++)
 	{
-
 		while (true)
 		{
 			thread thread_1(wrightToFile, fileNamePointer);
@@ -93,7 +92,6 @@ int main()
 			thread thread_2(readFromFile, fileNamePointer);
 			thread_2.join();
 		}
-
 	}
 
 	system("pause");
